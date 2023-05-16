@@ -1,0 +1,28 @@
+tables required
+
+store: to store how many store ids we have
+storeStatus:
+StoreBusinessHours: koi bhi store kab se kab tak khulta hai
+StoreTimeZone:
+
+
+Steps:
+1. we will use timezone table to convert business hours into utc time
+
+
+
+TODO:
+1. find how to make the data upto-date i.e how to interpolate the data
+2.
+
+
+
+
+
+Issues:
+1. handle the case of duplicate entries in 'store status' and 'menu-hours'
+
+
+
+
+

@@ -1,0 +1,27 @@
+# List the start up tasks. You can start them in parallel in multiple terminals. See https://www.gitpod.io/docs/config-start-tasks/
+tasks:
+  - name: Setup Project
+    init: |
+      pip install -r setup/requirements.txt
+      python setup/git_hooks.py
+      python setup/dev.py
+      npm install -g npm
+      npm install -g aws-cdk
+      bash scripts/init.sh
+      export RUN_MIGRATE=False
+    command: |
+      bash scripts/entrypoint.sh
+  # - name: Saml configure and login
+  #   init: |
+  #     (
+  #       set -e
+  #       eval $(gp env -e)
+  #       CURRENT_VERSION=$(curl -Ls https://api.github.com/repos/Versent/saml2aws/releases/latest | grep 'tag_name' | cut -d'v' -f2 | cut -d'"' -f1)
+  #       wget -c https://github.com/Versent/saml2aws/releases/download/v${CURRENT_VERSION}/saml2aws_${CURRENT_VERSION}_linux_amd64.tar.gz -O - | tar -xzv -C ~/.local/bin
+  #       chmod u+x ~/.local/bin/saml2aws
+  #       hash -r
+  #       saml2aws --version
+  #       saml2aws configure --idp-provider KeyCloak --username $AD_USERNAME --mfa Auto \
+  #       --url https://devfactory.devconnect-df.com/auth/realms/devfactory/protocol/saml/clients/aws --skip-prompt
+  #     )
+  #   command: saml2aws login --password=$AD_PASSWORD --skip-prompt --session-duration=3600 --role=arn:aws:iam::269164092502:role/RAM-AWS-Prod-Codenation-CNQ32021-Admin --force
