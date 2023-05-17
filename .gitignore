@@ -12,8 +12,4 @@ venvvv
 .env
 .env.tmp
 
-# Private Key
-keys/public_key.pem
-keys/private_key.pem
-keys/symmetric_keyfile.key
 data

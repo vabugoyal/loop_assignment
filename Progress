@@ -1,26 +1,49 @@
 tables required
+        store:
+        storeStatus:
+        StoreBusinessHours:
+        StoreTimeZone:
 
-store: to store how many store ids we have
-storeStatus:
-StoreBusinessHours: koi bhi store kab se kab tak khulta hai
-StoreTimeZone:
+uptime/downtime
+        last-hour : tell minutes
 
 
-Steps:
-1. we will use timezone table to convert business hours into utc time
+        last-day : tell hours
+
+
+        last-week : tell hours
+            we have business hours for a store let they be 9AM - 9PM
+            So, we have 12 hours
+            for each hour we will be having a poll
+
+
+we will store how many of them turned out to be active
+out of all the polls we had
+32 -> 21
+54 -> (32/21 * 54)
+
+
+
+
+
+
+
+
 
 
 
 TODO:
-1. find how to make the data upto-date i.e how to interpolate the data
-2.
+1.
 
 
 
 
 
 Issues:
-1. handle the case of duplicate entries in 'store status' and 'menu-hours'
+1.   There were duplicate entries for a  (store, day) tuple. So I have taken
+     the first one.
+
+
 
 
 

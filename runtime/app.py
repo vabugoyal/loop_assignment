@@ -1,9 +1,4 @@
-import logging 
-import os
-import sys
-import json
-import leangle
-import pandas as pd
+import logging
 
 from chalice import Chalice, CORSConfig, Response
 from dotenv import load_dotenv
