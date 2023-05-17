@@ -62,7 +62,12 @@ def get_last_n_days_analysis(id, n):
     hours within the service hours of the store in previous n days.
     """
     schedules = StoreBusinessHours.where(store_id=id)
-    time_zone = StoreTimeZone.find_or_fail(id).time_zone
+
+    try:
+        time_zone = StoreTimeZone.find_or_fail(id).time_zone
+    except Exception as e:
+        time_zone = "America/Chicago"
+
     polls = StoreStatus.where(store_id=id)
 
     # schedule_on_day on particular day of the week
@@ -96,3 +101,7 @@ def generate_report_last_n_days(id, n):
         "uptime": uptime_hours,
         "downtime": needed_polls - uptime_hours
     }
+
+
+def generate_report_last_hour(id):
+    pass
