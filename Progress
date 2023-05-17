@@ -19,8 +19,12 @@ uptime/downtime
 
 we will store how many of them turned out to be active
 out of all the polls we had
-32 -> 21
-54 -> (32/21 * 54)
+32(polls done) -> 21(active polls)
+54(polls needed) -> (32/21 * 54)(predicted active hours)
+
+what to do when we have no polls for the previous n days?
+-> we will use the previous data to make predictions
+
 
 
 
@@ -47,5 +51,8 @@ Issues:
 
 
 
+
+store_id that can be used for demo
+8860624215995785030
 
 
