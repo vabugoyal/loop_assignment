@@ -95,13 +95,56 @@ def get_last_n_days_analysis(id, n):
 
 def generate_report_last_n_days(id, n):
     active_polls, total_polls, needed_polls = get_last_n_days_analysis(id, n)
-    print(active_polls, total_polls, needed_polls)
-    uptime_hours = needed_polls * (active_polls / total_polls)
+    if total_polls:
+        uptime_hours = needed_polls * (active_polls / total_polls)
+        return {
+            "uptime": uptime_hours,
+            "downtime": needed_polls - uptime_hours
+        }
     return {
-        "uptime": uptime_hours,
-        "downtime": needed_polls - uptime_hours
+        "uptime": "No data",
+        "downtime": "No data"
     }
 
 
 def generate_report_last_hour(id):
-    pass
+    """
+    Check for the polls
+    """
+    schedules = StoreBusinessHours.where(store_id=id)
+
+    try:
+        time_zone = StoreTimeZone.find_or_fail(id).time_zone
+    except Exception as e:
+        time_zone = "America/Chicago"
+
+    polls = StoreStatus.where(store_id=id)
+
+    # schedule_on_day on particular day of the week
+    schedule_on_day = get_schedule_on_day(schedules)
+
+    total_polls = 0     # total actual polls done by our platform
+    active_polls = 0    # times when store was active
+
+    current_timestamp = datetime.now()
+
+    shift_to_current_time_stamp(polls)
+
+    for poll in polls.all():
+        if current_timestamp.hour == poll.timestamp.hour and current_timestamp.weekday() == poll.timestamp.weekday():
+            weekday = poll.timestamp.weekday()
+            local_time = convert_to_local_time(poll.timestamp, time_zone)
+
+            if in_between(local_time, schedule_on_day[weekday].start_time_local, schedule_on_day[weekday].end_time_local):
+                total_polls += 1
+                active_polls += poll.status == 'active'
+
+    if not total_polls:
+        return {
+            "uptime": "No data",
+            "downtime": "No data"
+        }
+    return {
+        "uptime": 60 * active_polls / total_polls,
+        "downtime": 60 * (total_polls - active_polls) / total_polls
+    }

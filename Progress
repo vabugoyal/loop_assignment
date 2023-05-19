@@ -6,30 +6,25 @@ tables required
 
 uptime/downtime
         last-hour : tell minutes
+                we are making polls every hour, so we can only make
+                predictions about the last hour.
+
 
 
         last-day : tell hours
-
-
         last-week : tell hours
             we have business hours for a store let they be 9AM - 9PM
             So, we have 12 hours
             for each hour we will be having a poll
 
 
-we will store how many of them turned out to be active
-out of all the polls we had
-32(polls done) -> 21(active polls)
-54(polls needed) -> (32/21 * 54)(predicted active hours)
+                we will store how many of them turned out to be active
+                out of all the polls we had
+                32(polls done) -> 21(active polls)
+                54(polls needed) -> (32/21 * 54)(predicted active hours)
 
-what to do when we have no polls for the previous n days?
--> we will use the previous data to make predictions
-
-
-
-
-
-
+                what to do when we have no polls for the previous n days?
+                -> we will use the previous data to make predictions
 
 
 
