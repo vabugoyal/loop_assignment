@@ -1,4 +1,5 @@
 import time
+import pandas as pd
 
 from datetime import datetime, timedelta, time
 
@@ -173,7 +174,14 @@ def generate_report(report_id):
         print("updated report data")
 
 
-def get_report_results(id):
+def generate_csv_report(id, file_name):
     """
     Given report id returns
     """
+    report_results = ReportResults.where(report_id=id).all()
+    columns = ReportResults.columns
+    data = pd.DataFrame(columns=columns)
+    for result in report_results:
+        rs = [getattr(result, column) for column in columns]
+        data.loc[len(data.index)] = rs
+    data.to_csv(file_name)

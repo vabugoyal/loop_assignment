@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from chalicelib.api.store import store_routes
+from chalicelib.api.report import store_routes
 
 app = Chalice(app_name='MyProject')
 app.debug = True

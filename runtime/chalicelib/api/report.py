@@ -1,12 +1,11 @@
 import logging
 
-
-from chalice import Blueprint, BadRequestError, UnauthorizedError
+from chalice import Blueprint, BadRequestError, UnauthorizedError, Response
 
 from ..constants import *
-from ..models.store import StoreStatus, StoreBusinessHours, StoreTimeZone, Store
-from ..models.report import ReportResults, ReportStatus
-from ..services.report_generation import generate_report
+from ..models.store import StoreTimeZone, Store
+from ..models.report import ReportStatus
+from ..services.report_generation import generate_report, generate_csv_report
 
 store_routes = Blueprint('store')
 logger = logging.getLogger(__name__)
@@ -43,8 +42,18 @@ def get_report(id):
     report = ReportStatus.find_or_fail(id)
     if not report.status:
         return "Running"
-    report_results = ReportResults.where(report_id=id).all()
 
+    file_name = "report.csv"
+    file_path = file_name
 
-    pass
+    generate_csv_report(id, file_name)
+
+    with open(file_path, 'rb') as f:
+        contents = f.read()
+
+    headers = {'Content-Type': 'application/octet-stream',
+        'Content-Disposition': 'attachment; filename={}'.format(file_name),
+        'Content-Length': str(os.path.getsize(file_path))
+    }
+    return Response(body=contents, headers=headers)
 
