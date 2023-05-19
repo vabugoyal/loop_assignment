@@ -20,6 +20,7 @@ if config.config_file_name is not None:
 from chalicelib.constants import DB_ENDPOINT
 from chalicelib.models.base import Base
 from chalicelib.models.store import Store, StoreStatus, StoreTimeZone
+from chalicelib.models.report import ReportStatus, ReportResults
 
 
 target_metadata = Base.metadata

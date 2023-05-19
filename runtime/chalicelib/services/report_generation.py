@@ -2,7 +2,8 @@ import time
 
 from datetime import datetime, timedelta, time
 
-from ..models.store import StoreStatus, StoreTimeZone, StoreBusinessHours
+from ..models.store import StoreStatus, StoreTimeZone, StoreBusinessHours, Store
+from ..models.report import ReportResults
 from .date_and_time import in_between, convert_to_local_time
 
 
@@ -101,10 +102,7 @@ def generate_report_last_n_days(id, n):
             "uptime": uptime_hours,
             "downtime": needed_polls - uptime_hours
         }
-    return {
-        "uptime": "No data",
-        "downtime": "No data"
-    }
+
 
 
 def generate_report_last_hour(id):
@@ -139,12 +137,43 @@ def generate_report_last_hour(id):
                 total_polls += 1
                 active_polls += poll.status == 'active'
 
-    if not total_polls:
+    if total_polls:
         return {
-            "uptime": "No data",
-            "downtime": "No data"
+            "uptime": 60 * active_polls / total_polls,
+            "downtime": 60 * (total_polls - active_polls) / total_polls
         }
-    return {
-        "uptime": 60 * active_polls / total_polls,
-        "downtime": 60 * (total_polls - active_polls) / total_polls
-    }
+
+
+def generate_report(report_id):
+    print("generating report")
+    stores = Store.all()
+
+    for store in stores:
+        print("generating report for store", store.store_id)
+        last_week_report = generate_report_last_n_days(store.store_id, 7)
+        last_day_report = generate_report_last_n_days(store.store_id, 7)
+        last_hour_report = generate_report_last_hour(store.store_id)
+        print("generated report data for the store.")
+        report_results = ReportResults.create(store_id=store.store_id, report_id=report_id)
+        if last_hour_report:
+            report_results.update(
+                uptime_last_hour=last_hour_report["uptime"],
+                downtime_last_hour=last_hour_report["downtime"],
+            )
+        if last_day_report:
+            report_results.update(
+                uptime_last_day=last_day_report["uptime"],
+                downtime_last_day=last_day_report["downtime"],
+            )
+        if last_week_report:
+            report_results.update(
+                uptime_last_week=last_week_report["uptime"],
+                downtime_last_week=last_week_report["downtime"]
+            )
+        print("updated report data")
+
+
+def get_report_results(id):
+    """
+    Given report id returns
+    """
