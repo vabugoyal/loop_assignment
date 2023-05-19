@@ -13,6 +13,6 @@ class BaseModel(Base, AllFeaturesMixin):
 
 
 engine = create_engine(DB_ENDPOINT, echo=False)
-session = scoped_session(sessionmaker(bind=engine, autocommit=True))
+session = scoped_session(sessionmaker(bind=engine, autocommit=True, autoflush=False))
 
 BaseModel.set_session(session)

@@ -1,4 +1,5 @@
 import logging
+import threading
 
 from chalice import Blueprint, BadRequestError, UnauthorizedError, Response
 
@@ -23,15 +24,15 @@ def dummy():
 
 @store_routes.route('/trigger_report', methods=['POST'], cors=True)
 def trigger_report():
-    print("triggered report generation")
     report_status = ReportStatus.create(status=0)
 
     # I will be doing report generation in a separate thread
     # for deployment we could have used a sqs queue here
     # as this is a long running task
-    generate_report(report_status.id)
+    thread = threading.Thread(target=generate_report, args=[report_status.id])
+    thread.start()
+    # generate_report(report_status.id)
 
-    report_status.update(status=1)
     return {
         "report_id" : report_status.id
     }
@@ -40,6 +41,7 @@ def trigger_report():
 @store_routes.route('/get_report/{id}', methods=['GET'], cors=True)
 def get_report(id):
     report = ReportStatus.find_or_fail(id)
+    print(report.status)
     if not report.status:
         return "Running"
 

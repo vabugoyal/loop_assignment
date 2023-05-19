@@ -4,7 +4,7 @@ import pandas as pd
 from datetime import datetime, timedelta, time
 
 from ..models.store import StoreStatus, StoreTimeZone, StoreBusinessHours, Store
-from ..models.report import ReportResults
+from ..models.report import ReportResults, ReportStatus
 from .date_and_time import in_between, convert_to_local_time
 
 
@@ -60,8 +60,6 @@ def get_needed_polls_last_n_days(n, schedules):
 
 def get_last_n_days_analysis(id, n):
     """
-    Given store id returns the number of uptime and downtime
-    hours within the service hours of the store in previous n days.
     """
     schedules = StoreBusinessHours.where(store_id=id)
 
@@ -83,14 +81,17 @@ def get_last_n_days_analysis(id, n):
 
     shift_to_current_time_stamp(polls)
 
-    for poll in polls.all():
-        if (current_timestamp - poll.timestamp).days < n:
-            weekday = poll.timestamp.weekday()
-            local_time = convert_to_local_time(poll.timestamp, time_zone)
+    for poll in polls:
+        try:
+            if (current_timestamp - poll.timestamp).days < n:
+                weekday = poll.timestamp.weekday()
+                local_time = convert_to_local_time(poll.timestamp, time_zone)
 
-            if in_between(local_time, schedule_on_day[weekday].start_time_local, schedule_on_day[weekday].end_time_local):
-                total_polls += 1
-                active_polls += poll.status == 'active'
+                if in_between(local_time, schedule_on_day[weekday].start_time_local, schedule_on_day[weekday].end_time_local):
+                    total_polls += 1
+                    active_polls += poll.status == 'active'
+        except Exception as e:
+            continue
 
     return active_polls, total_polls, needed_polls
 
@@ -129,7 +130,7 @@ def generate_report_last_hour(id):
 
     shift_to_current_time_stamp(polls)
 
-    for poll in polls.all():
+    for poll in polls:
         if current_timestamp.hour == poll.timestamp.hour and current_timestamp.weekday() == poll.timestamp.weekday():
             weekday = poll.timestamp.weekday()
             local_time = convert_to_local_time(poll.timestamp, time_zone)
@@ -146,32 +147,36 @@ def generate_report_last_hour(id):
 
 
 def generate_report(report_id):
-    print("generating report")
     stores = Store.all()
 
     for store in stores:
         print("generating report for store", store.store_id)
         last_week_report = generate_report_last_n_days(store.store_id, 7)
-        last_day_report = generate_report_last_n_days(store.store_id, 7)
+        last_day_report = generate_report_last_n_days(store.store_id, 1)
         last_hour_report = generate_report_last_hour(store.store_id)
-        print("generated report data for the store.")
-        report_results = ReportResults.create(store_id=store.store_id, report_id=report_id)
-        if last_hour_report:
-            report_results.update(
-                uptime_last_hour=last_hour_report["uptime"],
-                downtime_last_hour=last_hour_report["downtime"],
-            )
-        if last_day_report:
-            report_results.update(
-                uptime_last_day=last_day_report["uptime"],
-                downtime_last_day=last_day_report["downtime"],
-            )
-        if last_week_report:
-            report_results.update(
-                uptime_last_week=last_week_report["uptime"],
-                downtime_last_week=last_week_report["downtime"]
-            )
+        try:
+            report_results = ReportResults.create(store_id=store.store_id, report_id=report_id)
+            if last_hour_report:
+                report_results.update(
+                    uptime_last_hour=last_hour_report["uptime"],
+                    downtime_last_hour=last_hour_report["downtime"],
+                )
+            if last_day_report:
+                report_results.update(
+                    uptime_last_day=last_day_report["uptime"],
+                    downtime_last_day=last_day_report["downtime"],
+                )
+            if last_week_report:
+                report_results.update(
+                    uptime_last_week=last_week_report["uptime"],
+                    downtime_last_week=last_week_report["downtime"]
+                )
+        except Exception as e:
+            continue
         print("updated report data")
+
+    report_status = ReportStatus.find_or_fail(report_id)
+    report_status.update(status=1)
 
 
 def generate_csv_report(id, file_name):
